@@ -17,6 +17,8 @@ print(data.head())
 
 qmax = data['q'].max()
 print(f'Maximum q value: {qmax}')
+pmax = data['p'].max()
+print(f'Maximum p value: {pmax}')
 q_50 = qmax / 2
 print(f'Half of maximum q value: {q_50}')
 
@@ -47,19 +49,29 @@ epsilon_a_epsilon_v_min = data.loc[closest_index2, 'epsilon_a']
 print(f'Closest epsilon_a value for epsilon_v_min: {epsilon_a_epsilon_v_min}')
 
 
-# nu = processed_data['epsilon_r'] / processed_data['epsilon_a']
-# print(nu.head(50))
+nu = epsilon_v_min / epsilon_a_epsilon_v_min
+print(nu)
+
+M = qmax / pmax
+print(f'M value: {M}')
+
+sin_phi = 3*M / (6 + M)
+phi = np.arcsin(sin_phi)
+print(f'Phi: {round(np.degrees(phi), 2)}°')
+
+
+
 
 
 ################################ PLOTOVANI ##########################################
 ################################ epsilon_a, q ##########################################
-# plt.scatter(data['epsilon_a'], data['q'], label='Original Data')
-# plt.plot(x_function, y_function, label='E50 Secant Line', linestyle='-', color='red')
-# plt.plot(epsilon_a_q_50, q_50, 'x', markersize=20)
-# plt.xlabel('epsilon_a')
-# plt.ylabel('q')
-# plt.legend()
-# plt.show()
+plt.scatter(data['epsilon_a'], data['q'], label='Original Data')
+plt.plot(x_function, y_function, label='E50 Secant Line', linestyle='-', color='red')
+plt.plot(epsilon_a_q_50, q_50, 'x', markersize=20)
+plt.xlabel('epsilon_a')
+plt.ylabel('q')
+plt.legend()
+plt.show()
 
 ################################ epsilon_a, epsilon_v ##########################################
 plt.scatter(processed_data['epsilon_a'], processed_data['epsilon_v'], label='Original Data')
@@ -69,12 +81,12 @@ plt.ylabel('epsilon_v')
 plt.legend()
 plt.show()
 
-# ################################ p, q ##########################################
-# plt.scatter(processed_data['p'], processed_data['q'], label='Original Data')
-# plt.xlabel('p (kPa)')
-# plt.ylabel('q (kPa)')
-# plt.legend()
-# plt.show()
+################################ p, q ##########################################
+plt.scatter(processed_data['p'], processed_data['q'], label='Original Data')
+plt.xlabel('p (kPa)')
+plt.ylabel('q (kPa)')
+plt.legend()
+plt.show()
 
 
 
