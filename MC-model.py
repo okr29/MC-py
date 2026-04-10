@@ -55,28 +55,34 @@ phi = np.arcsin(sin_phi)
 print(f'Phi: {round(np.degrees(phi), 2)}°')
 
 
+# 1. Find the index (row number) 
+closest_index2 = (processed_data['epsilon_v'] - epsilon_v_min).abs().idxmin()
+# 2. Grab the value at that specific row
+epsilon_s_epsilon_v_min = data.loc[closest_index2, 'epsilon_s']
+print(f'Closest epsilon_s value for epsilon_v_min: {epsilon_s_epsilon_v_min}')
+
 epsilon_v_max = processed_data['epsilon_v'].max()
 print(f'Maximum epsilon_v value: {epsilon_v_max}')
 epsilon_v50_od_nuly = (epsilon_v_max - epsilon_v_min) / 2
-epsilon2 = (epsilon_v50_od_nuly - epsilon_v_min) / epsilon_a_epsilon_v_min
+epsilon2 = (epsilon_v50_od_nuly - epsilon_v_min) / epsilon_s_epsilon_v_min
 
 # 1. Find the index (row number) 
 closest_index3 = (processed_data['epsilon_v'] - epsilon_v50_od_nuly).abs().idxmin()
 # 2. Grab the value at that specific row
-epsilon_a_epsilon_v50_od_nuly = data.loc[closest_index3, 'epsilon_a']
-print(f'Closest epsilon_a value for epsilon_v50_od_nuly: {epsilon_a_epsilon_v50_od_nuly}')
+epsilon_s_epsilon_v50_od_nuly = data.loc[closest_index3, 'epsilon_s']
+print(f'Closest epsilon_s value for epsilon_v50_od_nuly: {epsilon_s_epsilon_v50_od_nuly}')
 
 # 1. Find the index (row number) 
 closest_index4 = (processed_data['epsilon_v'] - epsilon_v_min).abs().idxmin()
 # 2. Grab the value at that specific row
-epsilon_a_epsilon_v_min = data.loc[closest_index4, 'epsilon_a']
-print(f'Closest epsilon_a value for epsilon_v_min: {epsilon_a_epsilon_v_min}')
+epsilon_s_epsilon_v_min = data.loc[closest_index4, 'epsilon_s']
+print(f'Closest epsilon_s value for epsilon_v_min: {epsilon_s_epsilon_v_min}')
 
-M_psi = (epsilon_v50_od_nuly - epsilon_v_min) / (epsilon_a_epsilon_v50_od_nuly - epsilon_a_epsilon_v_min)
+M_psi = (epsilon_v50_od_nuly - epsilon_v_min) / (epsilon_s_epsilon_v50_od_nuly - epsilon_s_epsilon_v_min)
 print(f'epsilon_v50_od_nuly: {epsilon_v50_od_nuly}')
 print(f'epsilon_v_min: {epsilon_v_min}')
-print(f'epsilon_a_epsilon_v50_od_nuly: {epsilon_a_epsilon_v50_od_nuly}')
-print(f'epsilon_a_epsilon_v_min: {epsilon_a_epsilon_v_min}')
+print(f'epsilon_s_epsilon_v50_od_nuly: {epsilon_s_epsilon_v50_od_nuly}')
+print(f'epsilon_s_epsilon_v_min: {epsilon_s_epsilon_v_min}')
 
 
 
@@ -110,18 +116,20 @@ plt.ylabel('epsilon_v')
 plt.legend()
 plt.show()
 
-################################ epsilon_a, epsilon_v ##########################################
+################################ epsilon_s, epsilon_v ##########################################
 ################################ psi ##########################################
-plt.scatter(processed_data['epsilon_a'], processed_data['epsilon_v'], label='Original Data')
-plt.plot(np.linspace(0, processed_data['epsilon_a'].max()), np.linspace(0, 0), label='0 Line', linestyle='--', color='red')
+plt.scatter(processed_data['epsilon_s'], processed_data['epsilon_v'], label='Original Data')
+plt.plot(np.linspace(0, processed_data['epsilon_s'].max()), np.linspace(0, 0), label='0 Line', linestyle='--', color='red')
 my_custom_cap = 0.35
 x_function = np.linspace(0, my_custom_cap)
-y_function = M_psi * (x_function - epsilon_a_epsilon_v_min) + epsilon_v_min
+y_function = M_psi * (x_function - epsilon_s_epsilon_v_min) + epsilon_v_min
 plt.plot(x_function, y_function, label='psi Secant Line', linestyle='-', color='red')
-plt.xlabel('epsilon_a')
+plt.xlabel('epsilon_s')
 plt.ylabel('epsilon_v')
 plt.legend()
 plt.show()
+
+
 
 ################################ p, q ##########################################
 plt.scatter(processed_data['p'], processed_data['q'], label='Original Data')
@@ -130,6 +138,17 @@ plt.ylabel('q (kPa)')
 plt.legend()
 plt.show()
 
-
+################################ PLOTOVANI ##########################################
+################################ epsilon_s, q ##########################################
+plt.scatter(data['epsilon_s'], data['q'], label='Original Data')
+my_custom_cap = 0.05
+x_function = np.linspace(0, my_custom_cap)
+y_function = E_50 * x_function
+plt.plot(x_function, y_function, label='E50 Secant Line', linestyle='-', color='red')
+plt.plot(epsilon_a_q_50, q_50, 'x', markersize=20)
+plt.xlabel('epsilon_s')
+plt.ylabel('q')
+plt.legend()
+plt.show()
 
 # E_50 = q_50 / 
