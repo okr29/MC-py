@@ -38,14 +38,14 @@ epsilon_v_min = processed_data['epsilon_v'].min()
 print(f'Minimum epsilon_v value: {epsilon_v_min}')
 
 # 1. Find the index (row number) 
-closest_index2 = (processed_data['epsilon_v'] - epsilon_v_min).abs().idxmin()
+closest_index3 = (processed_data['epsilon_v'] - epsilon_v_min).abs().idxmin()
 # 2. Grab the value at that specific row
-epsilon_a_epsilon_v_min = data.loc[closest_index2, 'epsilon_a']
+epsilon_a_epsilon_v_min = data.loc[closest_index3, 'epsilon_a']
 print(f'Closest epsilon_a value for epsilon_v_min: {epsilon_a_epsilon_v_min}')
 
 
 nu = epsilon_v_min / epsilon_a_epsilon_v_min
-print(nu)
+print(f'nu: {nu}')
 
 M = qmax / pmax
 print(f'M value: {M}')
@@ -56,35 +56,23 @@ print(f'Phi: {round(np.degrees(phi), 2)}°')
 
 
 # 1. Find the index (row number) 
-closest_index2 = (processed_data['epsilon_v'] - epsilon_v_min).abs().idxmin()
-# 2. Grab the value at that specific row
-epsilon_s_epsilon_v_min = data.loc[closest_index2, 'epsilon_s']
-print(f'Closest epsilon_s value for epsilon_v_min: {epsilon_s_epsilon_v_min}')
-
-epsilon_v_max = processed_data['epsilon_v'].max()
-print(f'Maximum epsilon_v value: {epsilon_v_max}')
-epsilon_v50_od_nuly = (epsilon_v_max - epsilon_v_min) / 2
-epsilon2 = (epsilon_v50_od_nuly - epsilon_v_min) / epsilon_s_epsilon_v_min
-
-# 1. Find the index (row number) 
-closest_index3 = (processed_data['epsilon_v'] - epsilon_v50_od_nuly).abs().idxmin()
-# 2. Grab the value at that specific row
-epsilon_s_epsilon_v50_od_nuly = data.loc[closest_index3, 'epsilon_s']
-print(f'Closest epsilon_s value for epsilon_v50_od_nuly: {epsilon_s_epsilon_v50_od_nuly}')
-
-# 1. Find the index (row number) 
 closest_index4 = (processed_data['epsilon_v'] - epsilon_v_min).abs().idxmin()
 # 2. Grab the value at that specific row
 epsilon_s_epsilon_v_min = data.loc[closest_index4, 'epsilon_s']
 print(f'Closest epsilon_s value for epsilon_v_min: {epsilon_s_epsilon_v_min}')
 
+epsilon_v_max = processed_data['epsilon_v'].max()
+# print(f'Maximum epsilon_v value: {epsilon_v_max}')
+epsilon_v50_od_nuly = (epsilon_v_max - epsilon_v_min) / 2
+
+# 1. Find the index (row number) 
+closest_index5 = (processed_data['epsilon_v'] - epsilon_v50_od_nuly).abs().idxmin()
+# 2. Grab the value at that specific row
+epsilon_s_epsilon_v50_od_nuly = data.loc[closest_index5, 'epsilon_s']
+print(f'Closest epsilon_s value for epsilon_v50_od_nuly: {epsilon_s_epsilon_v50_od_nuly}')
+
 M_psi = (epsilon_v50_od_nuly - epsilon_v_min) / (epsilon_s_epsilon_v50_od_nuly - epsilon_s_epsilon_v_min)
-print(f'epsilon_v50_od_nuly: {epsilon_v50_od_nuly}')
-print(f'epsilon_v_min: {epsilon_v_min}')
-print(f'epsilon_s_epsilon_v50_od_nuly: {epsilon_s_epsilon_v50_od_nuly}')
-print(f'epsilon_s_epsilon_v_min: {epsilon_s_epsilon_v_min}')
-
-
+print(f'M_psi value: {M_psi}')
 
 sin_psi = 3*M_psi / (6 + M_psi)
 psi = np.arcsin(sin_psi)
