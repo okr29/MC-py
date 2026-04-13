@@ -2,13 +2,22 @@ import pandas
 import matplotlib.pyplot as plt
 import numpy as np
 
+# header in the data : epsilon_a sigma_a sigma_r epsilon_r epsilon_s p q x x
 
 def load_data(file_path):
     data = pandas.read_csv(file_path, sep=r'\s+')
     return data
 
+
+def load_other_data(file_path):
+    o_data = pandas.read_csv(file_path, sep=r'\s+')
+    return o_data
+
 data = load_data('115.dat')
 print(data.head())
+
+o_data = load_other_data('triax.out')
+print(o_data.head())
 
 # print(data.columns.tolist())
 
@@ -29,10 +38,14 @@ epsilon_a_q_50 = data.loc[closest_index, 'epsilon_a']
 print(f'Closest epsilon_a value: {epsilon_a_q_50}')
 
 E_50 = q_50 / epsilon_a_q_50
+print(f'E_50 value: {E_50}')
 
 
 processed_data = data.assign(epsilon_v=lambda x: x['epsilon_a'] - x['epsilon_r'] * 2)
 print(processed_data.head())
+
+processed_odata = o_data.assign(epsilon_v=lambda x: x['epsilon_a'] - x['epsilon_r'] * 2)
+print(processed_odata.head())
 
 epsilon_v_min = processed_data['epsilon_v'].min()
 print(f'Minimum epsilon_v value: {epsilon_v_min}')
@@ -80,7 +93,8 @@ print(f'Psi: {round(np.degrees(psi), 2)}°')
 
 ################################ PLOTOVANI ##########################################
 ################################ epsilon_a, q ##########################################
-plt.scatter(data['epsilon_a'], data['q'], label='Original Data')
+plt.scatter(data['epsilon_a'], data['q'], s=2, label='Original Data')
+plt.scatter(o_data['epsilon_a'], o_data['q'], s=2, label='Other Data', color='orange')
 my_custom_cap = 0.05
 x_function = np.linspace(0, my_custom_cap)
 y_function = E_50 * x_function
@@ -93,7 +107,8 @@ plt.show()
 
 ################################ epsilon_a, epsilon_v ##########################################
 ################################ nu ##########################################
-plt.scatter(processed_data['epsilon_a'], processed_data['epsilon_v'], label='Original Data')
+plt.scatter(processed_data['epsilon_a'], processed_data['epsilon_v'], s=2, label='Original Data')
+plt.scatter(processed_odata['epsilon_a'], processed_odata['epsilon_v'], s=2, label='Other Data', color='orange')
 plt.plot(np.linspace(0, processed_data['epsilon_a'].max()), np.linspace(0, 0), label='0 Line', linestyle='--', color='red')
 my_custom_cap = 0.05
 x_function = np.linspace(0, my_custom_cap)
@@ -106,8 +121,9 @@ plt.show()
 
 ################################ epsilon_s, epsilon_v ##########################################
 ################################ psi ##########################################
-plt.scatter(processed_data['epsilon_s'], processed_data['epsilon_v'], label='Original Data')
+plt.scatter(processed_data['epsilon_s'], processed_data['epsilon_v'], s=2, label='Original Data')
 plt.plot(np.linspace(0, processed_data['epsilon_s'].max()), np.linspace(0, 0), label='0 Line', linestyle='--', color='red')
+plt.scatter(processed_odata['epsilon_s'], processed_odata['epsilon_v'], s=2, label='Other Data', color='orange')
 my_custom_cap = 0.35
 x_function = np.linspace(0, my_custom_cap)
 y_function = M_psi * (x_function - epsilon_s_epsilon_v_min) + epsilon_v_min
@@ -120,23 +136,24 @@ plt.show()
 
 
 ################################ p, q ##########################################
-plt.scatter(processed_data['p'], processed_data['q'], label='Original Data')
+plt.scatter(processed_data['p'], processed_data['q'], s=2, label='Original Data')
+plt.scatter(processed_odata['p'], processed_odata['q'], s=2, label='Other Data', color='orange')
 plt.xlabel('p (kPa)')
 plt.ylabel('q (kPa)')
 plt.legend()
 plt.show()
 
-################################ PLOTOVANI ##########################################
-################################ epsilon_s, q ##########################################
-plt.scatter(data['epsilon_s'], data['q'], label='Original Data')
-my_custom_cap = 0.05
-x_function = np.linspace(0, my_custom_cap)
-y_function = E_50 * x_function
-plt.plot(x_function, y_function, label='E50 Secant Line', linestyle='-', color='red')
-plt.plot(epsilon_a_q_50, q_50, 'x', markersize=20)
-plt.xlabel('epsilon_s')
-plt.ylabel('q')
-plt.legend()
-plt.show()
+# ################################ PLOTOVANI ##########################################
+# ################################ epsilon_s, q ##########################################
+# plt.scatter(data['epsilon_s'], data['q'], label='Original Data')
+# my_custom_cap = 0.05
+# x_function = np.linspace(0, my_custom_cap)
+# y_function = E_50 * x_function
+# plt.plot(x_function, y_function, label='E50 Secant Line', linestyle='-', color='red')
+# plt.plot(epsilon_a_q_50, q_50, 'x', markersize=20)
+# plt.xlabel('epsilon_s')
+# plt.ylabel('q')
+# plt.legend()
+# plt.show()
 
-# E_50 = q_50 / 
+# # E_50 = q_50 / 
