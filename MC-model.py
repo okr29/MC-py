@@ -4,7 +4,7 @@ import numpy as np
 
 # 1. Define your files here
 original_file = '115.dat'
-other_files = ['triax.out', 'triax2.out'] # Add as many comparison files as you want here
+other_files = ['triax.out'] # Add as many comparison files as you want here
 
 # Fixed colors for your primary data
 orig_color = '#1f77b4' # Standard matplotlib blue
@@ -83,13 +83,13 @@ for file_path in other_files:
         'name': file_path,
         'data': o_data
     })
-    try:
-        o_data = pd.read_csv(file_path, sep=r'\s+')
-        # Compute the extra columns but nothing else
-        o_data = o_data.assign(epsilon_v=lambda x: x['epsilon_a'] - x['epsilon_r'] * 2)
-        other_datasets.append({'name': file_path, 'data': o_data})
-    except FileNotFoundError:
-        print(f"File {file_path} not found. Skipping.")
+# try:
+#     o_data = pd.read_csv(file_path, sep=r'\s+')
+#     # Compute the extra columns but nothing else
+#     o_data = o_data.assign(epsilon_v=lambda x: x['epsilon_a'] - x['epsilon_r'] * 2)
+#     other_datasets.append({'name': file_path, 'data': o_data})
+# except FileNotFoundError:
+#     print(f"File {file_path} not found. Skipping.")
 
 
 ################################ YIELD PARAMETERS FOR IDEAL MC ######################
@@ -194,7 +194,7 @@ plt.plot(x_function, y_function, label='psi Secant Line', linestyle='-', color=l
 my_custom_cap = 0.35
 x_function = np.linspace(0, my_custom_cap)
 y_function = M_psi_80 * (x_function - epsilon_s_epsilon_v_min) + epsilon_v_min
-plt.plot(x_function, y_function, label='psi_80 Secant Line', linestyle='-', color=line_color)
+#plt.plot(x_function, y_function, label='psi_80 Secant Line', linestyle='-', color=line_color)
 
 # Scatter for others
 # TRUE IDEALIZED MC CURVE
