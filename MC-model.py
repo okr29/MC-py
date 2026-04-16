@@ -66,7 +66,7 @@ print(f"E_50: {E_50:.2f} | nu: {nu:.4f} | Phi: {np.degrees(phi):.2f}° | Psi: {n
 
 
 # Define the headers for the .out files (9 columns)
-out_headers = ['epsilon_a', 'sigma_a', 'sigma_r', 'epsilon_r', 'epsilon_s', 'p', 'q', 'x1', 'x2']
+out_headers = ['epsilon_a', 'sigma_a', 'sigma_r', 'epsilon_v', 'epsilon_s', 'p', 'q', 'x1', 'x2']
 
 # --- PROCESS OTHER DATA ---
 other_datasets = []
@@ -76,8 +76,8 @@ for file_path in other_files:
     # Add header=None and names=out_headers here!
     o_data = pd.read_csv(file_path, sep=r'\s+', header=None, names=out_headers)
     
-    # Compute the extra columns but nothing else
-    o_data = o_data.assign(epsilon_v=lambda x: x['epsilon_a'] - x['epsilon_r'] * 2)
+    # # Compute the extra columns but nothing else
+    # o_data = o_data.assign(epsilon_v=lambda x: x['epsilon_a'] - x['epsilon_r'] * 2)
     
     other_datasets.append({
         'name': file_path,
@@ -110,8 +110,8 @@ nu_s = eps_v_y / eps_s_y
 
 # Derived flow rule slope for eps_v vs eps_a in plastic phase
 # Based on the invariant dq/dp = 3 and standard strain mappings
-M_psi_a = M_psi / (1 + M_psi / 3) 
-
+# M_psi_a = M_psi / (1 + M_psi / 3)
+M_psi_a = (2 * np.sin(psi)) / (1 - np.sin(psi))
 # Initial confining pressure (p0) derived from pmax and standard triaxial path
 p0 = 100
 #####################################################################################
@@ -175,7 +175,7 @@ ideal_eps_v_a = np.where(ideal_eps_a <= eps_a_y,
 plt.plot(ideal_eps_a, ideal_eps_v_a, label='Idealized EP-MC', linestyle='--', color=ideal_mc_color, linewidth=2)
 
 for i, ds in enumerate(other_datasets):
-    plt.scatter(ds['data']['epsilon_a'], ds['data']['epsilon_v'], s=2, label=f"{ds['name']}", color=colors(i))
+    plt.scatter(ds['data']['epsilon_a'], -ds['data']['epsilon_v'], s=2, label=f"{ds['name']}", color=colors(i))
 
 plt.plot(np.linspace(0, max_eps_a), np.linspace(0, 0), label='0 Line', linestyle='-', color='pink')
 plt.xlabel('epsilon_a')
@@ -207,7 +207,7 @@ ideal_eps_v_s = np.where(ideal_eps_s <= eps_s_y,
 plt.plot(ideal_eps_s, ideal_eps_v_s, label='Idealized EP-MC', linestyle='--', color=ideal_mc_color, linewidth=2)
 
 for i, ds in enumerate(other_datasets):
-    plt.scatter(ds['data']['epsilon_s'], ds['data']['epsilon_v'], s=2, label=f"{ds['name']}", color=colors(i))
+    plt.scatter(ds['data']['epsilon_s'], -ds['data']['epsilon_v'], s=2, label=f"{ds['name']}", color=colors(i))
 
 plt.plot(np.linspace(0, max_eps_s), np.linspace(0, 0), label='0 Line', linestyle='-', color='pink')
 plt.xlabel('epsilon_s')
