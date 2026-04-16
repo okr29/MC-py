@@ -113,7 +113,7 @@ nu_s = eps_v_y / eps_s_y
 M_psi_a = M_psi / (1 + M_psi / 3) 
 
 # Initial confining pressure (p0) derived from pmax and standard triaxial path
-p0 = pmax - (qmax / 3)
+p0 = 100
 #####################################################################################
 
 
