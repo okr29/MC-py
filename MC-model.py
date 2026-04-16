@@ -9,6 +9,7 @@ other_files = ['triax.out', 'triax2.out'] # Add as many comparison files as you 
 # Fixed colors for your primary data
 orig_color = '#1f77b4' # Standard matplotlib blue
 line_color = 'red'
+ideal_mc_color = 'black' # Color for the Idealized MC curve
 
 # Define the headers for the original data
 og_headers = ['epsilon_a', 'sigma_a', 'sigma_r', 'epsilon_r', 'epsilon_s', 'p', 'q', 'x1', 'x2', 'x3']
@@ -82,6 +83,35 @@ for file_path in other_files:
         'name': file_path,
         'data': o_data
     })
+    try:
+        o_data = pd.read_csv(file_path, sep=r'\s+')
+        # Compute the extra columns but nothing else
+        o_data = o_data.assign(epsilon_v=lambda x: x['epsilon_a'] - x['epsilon_r'] * 2)
+        other_datasets.append({'name': file_path, 'data': o_data})
+    except FileNotFoundError:
+        print(f"File {file_path} not found. Skipping.")
+
+
+################################ YIELD PARAMETERS FOR IDEAL MC ######################
+# Calculate secant shear modulus G_50
+epsilon_s_q_50 = data.loc[closest_index, 'epsilon_s']
+G_50 = q_50 / epsilon_s_q_50
+
+# Define the exact coordinates of the Yield Point (the break point)
+eps_a_y = qmax / E_50
+eps_s_y = qmax / G_50
+eps_v_y = nu * eps_a_y
+
+# Secant slope for eps_v vs eps_s in the elastic phase
+nu_s = eps_v_y / eps_s_y 
+
+# Derived flow rule slope for eps_v vs eps_a in plastic phase
+# Based on the invariant dq/dp = 3 and standard strain mappings
+M_psi_a = M_psi / (1 + M_psi / 3) 
+
+# Initial confining pressure (p0) derived from pmax and standard triaxial path
+p0 = pmax - (qmax / 3)
+#####################################################################################
 
 
 ################################ PLOTOVANI ##########################################
@@ -97,18 +127,27 @@ def get_max_val(column_name):
     max_others = max(ds['data'][column_name].max() for ds in other_datasets)
     return max(max_orig, max_others)
 
+# Shared X-axis arrays for plotting continuous lines
+max_eps_a = get_max_val('epsilon_a')
+ideal_eps_a = np.linspace(0, max_eps_a, 500)
+
+max_eps_s = get_max_val('epsilon_s')
+ideal_eps_s = np.linspace(0, max_eps_s, 500)
+
+
 # --- Figure 1: epsilon_a vs q ---
 plt.figure()
 plt.scatter(data['epsilon_a'], data['q'], s=2, label='Original Data', color=orig_color)
 
-# Secant line for original ONLY
 my_custom_cap = 0.05
 x_function = np.linspace(0, my_custom_cap)
-y_function = E_50 * x_function
-plt.plot(x_function, y_function, label='E50 Secant Line', linestyle='-', color=line_color)
+plt.plot(x_function, E_50 * x_function, label='E50 Secant Line', linestyle='-', color=line_color)
 plt.plot(epsilon_a_q_50, q_50, 'x', markersize=10, color=line_color)
 
-# Scatter for others
+# TRUE IDEALIZED MC CURVE
+ideal_q_mc = np.minimum(E_50 * ideal_eps_a, qmax)
+plt.plot(ideal_eps_a, ideal_q_mc, label='Idealized EP-MC', linestyle='--', color=ideal_mc_color, linewidth=2)
+
 for i, ds in enumerate(other_datasets):
     plt.scatter(ds['data']['epsilon_a'], ds['data']['q'], s=2, label=f"{ds['name']}", color=colors(i))
 
@@ -117,33 +156,35 @@ plt.ylabel('q')
 plt.legend()
 plt.show()
 
+
 # --- Figure 2: epsilon_a vs epsilon_v ---
 plt.figure()
 plt.scatter(data['epsilon_a'], data['epsilon_v'], s=2, label='Original Data', color=orig_color)
 
-# Secant line for original ONLY
 my_custom_cap = 0.05
 x_function = np.linspace(0, my_custom_cap)
-y_function = nu * x_function
-plt.plot(x_function, y_function, label='nu Secant Line', linestyle='-', color=line_color)
+plt.plot(x_function, nu * x_function, label='nu Secant Line', linestyle='-', color=line_color)
 
-# Scatter for others
+# TRUE IDEALIZED MC CURVE (V-shape: Elastic compression then plastic dilation)
+ideal_eps_v_a = np.where(ideal_eps_a <= eps_a_y, 
+                         nu * ideal_eps_a,  # Elastic phase
+                         eps_v_y + M_psi_a * (ideal_eps_a - eps_a_y)) # Plastic phase
+plt.plot(ideal_eps_a, ideal_eps_v_a, label='Idealized EP-MC', linestyle='--', color=ideal_mc_color, linewidth=2)
+
 for i, ds in enumerate(other_datasets):
     plt.scatter(ds['data']['epsilon_a'], ds['data']['epsilon_v'], s=2, label=f"{ds['name']}", color=colors(i))
 
-# 0 Line
-plt.plot(np.linspace(0, get_max_val('epsilon_a')), np.linspace(0, 0), label='0 Line', linestyle='--', color='black')
-
+plt.plot(np.linspace(0, max_eps_a), np.linspace(0, 0), label='0 Line', linestyle='--', color='black')
 plt.xlabel('epsilon_a')
 plt.ylabel('epsilon_v')
 plt.legend()
 plt.show()
 
+
 # --- Figure 3: epsilon_s vs epsilon_v ---
 plt.figure()
 plt.scatter(data['epsilon_s'], data['epsilon_v'], s=2, label='Original Data', color=orig_color)
 
-# Secant line for original ONLY
 my_custom_cap = 0.35
 x_function = np.linspace(0, my_custom_cap)
 y_function = M_psi * (x_function - epsilon_s_epsilon_v_min) + epsilon_v_min
@@ -156,22 +197,30 @@ y_function = M_psi_80 * (x_function - epsilon_s_epsilon_v_min) + epsilon_v_min
 plt.plot(x_function, y_function, label='psi_80 Secant Line', linestyle='-', color=line_color)
 
 # Scatter for others
+# TRUE IDEALIZED MC CURVE
+ideal_eps_v_s = np.where(ideal_eps_s <= eps_s_y, 
+                         nu_s * ideal_eps_s, # Elastic phase
+                         eps_v_y + M_psi * (ideal_eps_s - eps_s_y)) # Plastic phase
+plt.plot(ideal_eps_s, ideal_eps_v_s, label='Idealized EP-MC', linestyle='--', color=ideal_mc_color, linewidth=2)
+
 for i, ds in enumerate(other_datasets):
     plt.scatter(ds['data']['epsilon_s'], ds['data']['epsilon_v'], s=2, label=f"{ds['name']}", color=colors(i))
 
-# 0 Line
-plt.plot(np.linspace(0, get_max_val('epsilon_s')), np.linspace(0, 0), label='0 Line', linestyle='--', color='black')
-
+plt.plot(np.linspace(0, max_eps_s), np.linspace(0, 0), label='0 Line', linestyle='--', color='black')
 plt.xlabel('epsilon_s')
 plt.ylabel('epsilon_v')
 plt.legend()
 plt.show()
 
+
 # --- Figure 4: p vs q ---
 plt.figure()
 plt.scatter(data['p'], data['q'], s=2, label='Original Data', color=orig_color)
 
-# Scatter for others
+# TRUE IDEALIZED MC CURVE (Stress path straight line ending at failure point)
+plt.plot([p0, pmax], [0, qmax], label='Idealized MC Stress Path', linestyle='--', color=ideal_mc_color, linewidth=2)
+plt.plot(pmax, qmax, 'ko', markersize=6, label='Yield/Failure Point') # Mark the break point
+
 for i, ds in enumerate(other_datasets):
     plt.scatter(ds['data']['p'], ds['data']['q'], s=2, label=f"{ds['name']}", color=colors(i))
 
@@ -185,7 +234,10 @@ plt.show()
 plt.figure()
 plt.scatter(data['epsilon_s'], data['q'], s=2, label='Original Data', color=orig_color)
 
-# Scatter for others
+# TRUE IDEALIZED MC CURVE 
+ideal_q_s = np.minimum(G_50 * ideal_eps_s, qmax)
+plt.plot(ideal_eps_s, ideal_q_s, label='Idealized EP-MC', linestyle='--', color=ideal_mc_color, linewidth=2)
+
 for i, ds in enumerate(other_datasets):
     plt.scatter(ds['data']['epsilon_s'], ds['data']['q'], s=2, label=f"{ds['name']}", color=colors(i))
 
