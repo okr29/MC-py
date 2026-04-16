@@ -4,7 +4,7 @@ import numpy as np
 
 # 1. Define your files here
 original_file = '115.dat'
-other_files = ['triax.out'] # Add as many comparison files as you want here
+other_files = ['triax.out', 'triax2.out'] # Add as many comparison files as you want here
 
 # Fixed colors for your primary data
 orig_color = '#1f77b4' # Standard matplotlib blue
@@ -46,22 +46,35 @@ epsilon_s_epsilon_v_min = data.loc[closest_index4, 'epsilon_s']
 
 epsilon_v_max = data['epsilon_v'].max()
 epsilon_v50_od_nuly = (epsilon_v_max - epsilon_v_min) / 2
+epsilon_v80_od_nuly = (epsilon_v_max - epsilon_v_min) * 0.8
 
-closest_index5 = (data['epsilon_v'] - epsilon_v50_od_nuly).abs().idxmin()
-epsilon_s_epsilon_v50_od_nuly = data.loc[closest_index5, 'epsilon_s']
+closest_index6 = (data['epsilon_v'] - epsilon_v50_od_nuly).abs().idxmin()
+epsilon_s_epsilon_v50_od_nuly = data.loc[closest_index6, 'epsilon_s']
+
+closest_index6 = (data['epsilon_v'] - epsilon_v80_od_nuly).abs().idxmin()
+epsilon_s_epsilon_v80_od_nuly = data.loc[closest_index6, 'epsilon_s']
 
 M_psi = (epsilon_v50_od_nuly - epsilon_v_min) / (epsilon_s_epsilon_v50_od_nuly - epsilon_s_epsilon_v_min)
+M_psi_80 = (epsilon_v80_od_nuly - epsilon_v_min) / (epsilon_s_epsilon_v80_od_nuly - epsilon_s_epsilon_v_min)
 sin_psi = 3 * M_psi / (6 + M_psi)
+sin_psi_80 = 3 * M_psi_80 / (6 + M_psi_80)
 psi = np.arcsin(sin_psi)
+psi_80 = np.arcsin(sin_psi_80)
 
-print(f"E_50: {E_50:.2f} | nu: {nu:.4f} | Phi: {np.degrees(phi):.2f}° | Psi: {np.degrees(psi):.2f}°\n")
+print(f"E_50: {E_50:.2f} | nu: {nu:.4f} | Phi: {np.degrees(phi):.2f}° | Psi: {np.degrees(psi):.2f}° | Psi_80: {np.degrees(psi_80):.2f}°\n")
 
+
+# Define the headers for the .out files (9 columns)
+out_headers = ['epsilon_a', 'sigma_a', 'sigma_r', 'epsilon_r', 'epsilon_s', 'p', 'q', 'x1', 'x2']
 
 # --- PROCESS OTHER DATA ---
 other_datasets = []
 for file_path in other_files:
     print(f"--- Loading basic data for: {file_path} ---")
-    o_data = pd.read_csv(file_path, sep=r'\s+')
+    
+    # Add header=None and names=out_headers here!
+    o_data = pd.read_csv(file_path, sep=r'\s+', header=None, names=out_headers)
+    
     # Compute the extra columns but nothing else
     o_data = o_data.assign(epsilon_v=lambda x: x['epsilon_a'] - x['epsilon_r'] * 2)
     
@@ -135,6 +148,12 @@ my_custom_cap = 0.35
 x_function = np.linspace(0, my_custom_cap)
 y_function = M_psi * (x_function - epsilon_s_epsilon_v_min) + epsilon_v_min
 plt.plot(x_function, y_function, label='psi Secant Line', linestyle='-', color=line_color)
+
+# Secant line for original ONLY 80%
+my_custom_cap = 0.35
+x_function = np.linspace(0, my_custom_cap)
+y_function = M_psi_80 * (x_function - epsilon_s_epsilon_v_min) + epsilon_v_min
+plt.plot(x_function, y_function, label='psi_80 Secant Line', linestyle='-', color=line_color)
 
 # Scatter for others
 for i, ds in enumerate(other_datasets):
