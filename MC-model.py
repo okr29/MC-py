@@ -83,6 +83,9 @@ for file_path in other_files:
         'name': file_path,
         'data': o_data
     })
+
+
+
 # try:
 #     o_data = pd.read_csv(file_path, sep=r'\s+')
 #     # Compute the extra columns but nothing else
@@ -174,7 +177,7 @@ plt.plot(ideal_eps_a, ideal_eps_v_a, label='Idealized EP-MC', linestyle='--', co
 for i, ds in enumerate(other_datasets):
     plt.scatter(ds['data']['epsilon_a'], ds['data']['epsilon_v'], s=2, label=f"{ds['name']}", color=colors(i))
 
-plt.plot(np.linspace(0, max_eps_a), np.linspace(0, 0), label='0 Line', linestyle='--', color='black')
+plt.plot(np.linspace(0, max_eps_a), np.linspace(0, 0), label='0 Line', linestyle='-', color='pink')
 plt.xlabel('epsilon_a')
 plt.ylabel('epsilon_v')
 plt.legend()
@@ -206,7 +209,7 @@ plt.plot(ideal_eps_s, ideal_eps_v_s, label='Idealized EP-MC', linestyle='--', co
 for i, ds in enumerate(other_datasets):
     plt.scatter(ds['data']['epsilon_s'], ds['data']['epsilon_v'], s=2, label=f"{ds['name']}", color=colors(i))
 
-plt.plot(np.linspace(0, max_eps_s), np.linspace(0, 0), label='0 Line', linestyle='--', color='black')
+plt.plot(np.linspace(0, max_eps_s), np.linspace(0, 0), label='0 Line', linestyle='-', color='pink')
 plt.xlabel('epsilon_s')
 plt.ylabel('epsilon_v')
 plt.legend()
