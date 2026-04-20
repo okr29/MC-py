@@ -222,7 +222,7 @@ plt.scatter(data['p'], data['q'], s=2, label='Original Data', color=orig_color)
 
 # TRUE IDEALIZED MC CURVE (Stress path straight line ending at failure point)
 plt.plot([p0, pmax], [0, qmax], label='Idealized MC Stress Path', linestyle='--', color=ideal_mc_color, linewidth=2)
-plt.plot(pmax, qmax, 'ko', markersize=6, label='Yield/Failure Point') # Mark the break point
+# plt.plot(pmax, qmax, 'ko', markersize=6, label='Yield/Failure Point') # Mark the break point
 
 for i, ds in enumerate(other_datasets):
     plt.scatter(ds['data']['p'], ds['data']['q'], s=2, label=f"{ds['name']}", color=colors(i))
