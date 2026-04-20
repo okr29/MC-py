@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # 1. Define your files here
-original_file = '115.dat'
+original_file = '110.dat'
 other_files = ['triax.out'] # Add as many comparison files as you want here
 
 # Fixed colors for your primary data
